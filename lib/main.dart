@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lab1flutter/product.dart';
-import 'package:lab1flutter/product_store.dart';
+import 'package:lab1flutter/product_dao.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,7 +40,7 @@ class _ProductHomePageState extends State<ProductHomePage> {
 
   List<Product> get _visible {
     final q = _searchController.text;
-    return ProductStore.searchByName(q);
+    return ProductDAO.searchByName(q);
   }
 
   void _refresh() => setState(() {});
@@ -112,7 +112,7 @@ class _ProductHomePageState extends State<ProductHomePage> {
     }
 
     if (existing == null) {
-      ProductStore.add(
+      ProductDAO.add(
         Product(
           id: 0,
           name: nameCtrl.text.trim(),
@@ -121,7 +121,7 @@ class _ProductHomePageState extends State<ProductHomePage> {
         ),
       );
     } else {
-      ProductStore.update(
+      ProductDAO.edit(
         existing.copyWith(
           name: nameCtrl.text.trim(),
           image: imageCtrl.text.trim(),
@@ -145,7 +145,7 @@ class _ProductHomePageState extends State<ProductHomePage> {
           ),
           FilledButton(
             onPressed: () {
-              ProductStore.removeById(p.id);
+              ProductDAO.removeById(p.id);
               Navigator.pop(ctx);
               _refresh();
             },
@@ -167,7 +167,7 @@ class _ProductHomePageState extends State<ProductHomePage> {
           PopupMenuButton<String>(
             onSelected: (v) {
               if (v == 'raw') {
-                debugPrint(ProductStore.displayAll());
+                debugPrint(ProductDAO.displayAll());
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Đã in danh sách ra console (debugPrint)'),
@@ -176,15 +176,22 @@ class _ProductHomePageState extends State<ProductHomePage> {
                 return;
               }
               if (v == 'p_asc') {
-                ProductStore.sortByPrice(ascending: true);
+                ProductDAO.sortByPrice(ascending: true);
               } else if (v == 'p_desc') {
-                ProductStore.sortByPrice(ascending: false);
+                ProductDAO.sortByPrice(ascending: false);
               } else if (v == 'n_asc') {
-                ProductStore.sortByName(ascending: true);
+                ProductDAO.sortByName(ascending: true);
               } else if (v == 'n_desc') {
-                ProductStore.sortByName(ascending: false);
+                ProductDAO.sortByName(ascending: false);
               } else if (v == 'id') {
-                ProductStore.sortById();
+                ProductDAO.sortById();
+              } else if (v == 'inc_price') {
+                ProductDAO.increasePrice();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Đã tăng giá tất cả sản phẩm lên 10%'),
+                  ),
+                );
               }
               _refresh();
             },
@@ -194,6 +201,10 @@ class _ProductHomePageState extends State<ProductHomePage> {
               PopupMenuItem(value: 'n_asc', child: Text('Tên A→Z')),
               PopupMenuItem(value: 'n_desc', child: Text('Tên Z→A')),
               PopupMenuItem(value: 'id', child: Text('Sắp xếp theo id')),
+              PopupMenuItem(
+                value: 'inc_price',
+                child: Text('Tăng giá +10% (map)'),
+              ),
               PopupMenuItem(
                 value: 'raw',
                 child: Text('Hiển thị chuỗi (console)'),
